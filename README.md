@@ -1,3 +1,4 @@
+
 # Codex Development Harness
 
 A small, practical harness for making AI-assisted software development safer, more predictable, and easier to review.
@@ -52,78 +53,84 @@ But deterministic rules should be enforced deterministically.
 
 ## Installation
 
-This harness is designed to run from your user-level Codex configuration:
-
-~/.codex/
-
-1. Clone the Repository
-
-Clone the repository somewhere temporary:
-
-```text
-git clone https://github.com/taylorw2/codex-harness.git
-cd codex-harness
-```
-
-2. Inspect the Hooks
-
-Do not install hooks you have not reviewed.
-
-Hooks execute policy code on your machine. Read the configuration and scripts before installing them:
-
-```text
-cat hooks.json
-cat hooks/protect_secrets.py
-cat hooks/git_diff_budget.py
-```
-
-Understand what each hook reads, executes, allows, and denies.
-
-That is especially important for a project whose purpose is improving AI development safety.
-
-3. Install Into Codex
-
-Create the hooks directory if necessary:
-
-```text
-mkdir -p ~/.codex/hooks
-```
-
-Copy the policy scripts:
-
-```text
-cp hooks/*.py ~/.codex/hooks/
-```
-
-Copy the hook configuration:
-
-```text
-cp hooks.json ~/.codex/hooks.json
-```
-
-Your Codex directory should now contain:
+This harness is designed to run directly from your user-level Codex configuration:
 
 ```text
 ~/.codex/
+```
+
+The repository does **not** install into:
+
+```text
+~/.codex/codex-harness/
+```
+
+The repository itself becomes the Git-managed portion of `~/.codex`.
+
+Your personal Codex configuration and runtime state remain in the same directory but are excluded from Git.
+
+The intended result looks like:
+
+```text
+~/.codex/
+├── .git/
+├── .gitignore
+├── README.md
 ├── hooks.json
-└── hooks/
-    ├── protect_secrets.py
-    └── git_diff_budget.py
+├── hooks/
+│   ├── protect_secrets.py
+│   └── git_diff_budget.py
+│
+├── config.toml
+├── sessions/
+└── other Codex runtime state...
 ```
 
-Already Using Codex Hooks?
+The harness files are version controlled.
 
-If you already have:
+Your machine-specific Codex state should remain ignored.
+
+### Install
+
+If `~/.codex` already exists:
+
+```bash
+cd ~/.codex
+
+git init
+git remote add origin https://github.com/taylorw2/codex-harness.git
+git fetch origin
+
+git checkout origin/main -- .gitignore README.md hooks.json hooks/
+```
+
+> **Important:** If you already have custom hooks or an existing `hooks.json`, inspect and preserve them before installing. Do not blindly overwrite an existing configuration.
+
+### Trust the Hooks
+
+After installation, start Codex and run:
 
 ```text
-~/.codex/hooks.json
+/hooks
 ```
 
-Do not overwrite it blindly.
+Review the hooks Codex discovered and trust them only after inspecting the policy code.
 
-Review your existing configuration and merge these hooks into it.
+### Verify
 
-The same principle applies to the policy scripts: understand what is already installed before replacing anything.
+Do not assume that because the files exist, the policies are active.
+
+Try an operation that should be denied.
+
+For example, ask Codex to access a protected `.env` file.
+
+The important result is not that the model *chooses* to refuse.
+
+The tool request itself should be rejected by the hook before execution.
+
+Then try an ordinary operation that should be allowed.
+
+> **Do not verify the model's promise. Verify the boundary.**
 
 ## Current Policies
 
