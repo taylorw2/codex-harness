@@ -1,0 +1,16 @@
+# Ignore everything
+*
+
+# Keep this .gitignore itself
+!.gitignore
+
+# Keep hooks.json
+!hooks.json
+
+# Keep the hooks directory and everything inside it
+!hooks/
+!hooks/**
+
+# keep tests
+!tests/
+!tests/**
